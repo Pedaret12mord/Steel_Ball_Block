@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "***",
+    "*#*",
+    "***"
+  ],
+  "key": {
+    "#": {
+      "item": "keeplooking4ward:steel_ball_base"
+    },
+    "*": {
+      "item": "keeplooking4ward:satellite"
+    }
+  },
+  "result": {
+    "item": "keeplooking4ward:wrecking_ball",
+    "count": 1
+  }
+}

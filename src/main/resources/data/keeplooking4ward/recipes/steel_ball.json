@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "*#*",
+    "###",
+    "*#*"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:iron_ingot"
+    },
+    "*": {
+      "item": "minecraft:lime_dye"
+    }
+  },
+  "result": {
+    "item": "keeplooking4ward:steel_ball",
+    "count": 1
+  }
+}
