@@ -230,7 +230,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                     {
                         if(owner instanceof Player player)
                         {
-                            ItemStack returnedBomb = new ItemStack(ModItems.BOMB.get());
+                            ItemStack returnedBomb = new ItemStack(ModItems.STEELBALL.get());
                             if(!player.getInventory().add(returnedBomb))
                             {
                                 player.drop(returnedBomb,false);
@@ -269,7 +269,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
     @Override
     protected Item getDefaultItem() {
-        return ModItems.BOMB.get();
+        return ModItems.STEELBALL.get();
     }
 
     @Override

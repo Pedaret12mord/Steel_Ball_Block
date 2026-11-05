@@ -1,8 +1,8 @@
 {
   "item.keeplooking4ward.satellite" : "Satellite",
   "item.keeplooking4ward.steel_ball_base" : "Wrecking Ball Base",
-  "item.keeplooking4ward.bomb" : "Bomb",
-  "item.keeplooking4ward.wrecking_ball_func" : "Wekapipo Wrecking Ball",
+  "item.keeplooking4ward.steel_ball" : "Steel Ball",
+  "item.keeplooking4ward.wrecking_ball" : "Wrecking Ball",
 
 
   "creativetab.steel_ball_run_tab" : "Steel Ball Run"

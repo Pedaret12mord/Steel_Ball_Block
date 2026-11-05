@@ -1,6 +1,6 @@
 package net.chargablepipe.keeplooking4ward.item;
 import net.chargablepipe.keeplooking4ward.KeepLooking4ward;
-import net.chargablepipe.keeplooking4ward.item.custom.BombItem;
+import net.chargablepipe.keeplooking4ward.item.custom.SteelBallItem;
 import net.chargablepipe.keeplooking4ward.item.custom.SatelliteItem;
 import net.chargablepipe.keeplooking4ward.item.custom.WreckingItem;
 import net.minecraft.world.item.Item;
@@ -25,12 +25,12 @@ public class ModItems {
     public static final RegistryObject<Item> STEELBALLBASE = ITEMS.register("steel_ball_base",
             () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<Item> BOMB = ITEMS.register("bomb",
-                    () -> new BombItem(
+    public static final RegistryObject<Item> STEELBALL = ITEMS.register("steel_ball",
+                    () -> new SteelBallItem(
                             new Item.Properties().stacksTo(1)
                     ));
 
-    public static final RegistryObject<Item> WRECKING_BALL_FUNC = ITEMS.register("wrecking_ball_func",
+    public static final RegistryObject<Item> WRECKING_BALL = ITEMS.register("wrecking_ball",
             () -> new WreckingItem(
                     new Item.Properties().stacksTo(1)
             ));

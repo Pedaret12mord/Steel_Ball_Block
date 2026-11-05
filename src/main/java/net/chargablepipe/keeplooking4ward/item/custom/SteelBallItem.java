@@ -13,8 +13,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 
 
-public class BombItem extends Item {
-    public BombItem(Properties p_41383_) {
+public class SteelBallItem extends Item {
+    public SteelBallItem(Properties p_41383_) {
         super(p_41383_);
     }
 

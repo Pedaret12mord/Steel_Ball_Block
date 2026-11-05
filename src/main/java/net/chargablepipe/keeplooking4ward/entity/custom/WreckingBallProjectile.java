@@ -198,7 +198,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                     {
                         if(owner instanceof Player player)
                         {
-                            ItemStack returnedBomb = new ItemStack(ModItems.WRECKING_BALL_FUNC.get());
+                            ItemStack returnedBomb = new ItemStack(ModItems.WRECKING_BALL.get());
                             if(!player.getInventory().add(returnedBomb))
                             {
                                 player.drop(returnedBomb,false);
@@ -237,7 +237,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
 
     @Override
     protected Item getDefaultItem() {
-        return ModItems.WRECKING_BALL_FUNC.get();
+        return ModItems.WRECKING_BALL.get();
     }
 
     @Override
