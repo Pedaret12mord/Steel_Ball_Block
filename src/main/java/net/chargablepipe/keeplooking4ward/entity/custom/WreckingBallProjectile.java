@@ -3,6 +3,7 @@ package net.chargablepipe.keeplooking4ward.entity.custom;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -105,6 +106,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 if (slowdownTick >= slowdownDuration) {
                     this.setDeltaMovement(Vec3.ZERO);
                     phase = FlightPhase.STOPPING;
+                    spawnSatellites();
                 }
             }
 
@@ -219,6 +221,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
         }
     }
 
+
     public WreckingBallProjectile(EntityType<? extends ThrowableItemProjectile> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
         this.startPosition = this.position();
@@ -232,6 +235,44 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     public WreckingBallProjectile(Level p_37443_, LivingEntity p_37439_) {
         super(ModEntities.WRECKINGBALLPROJECT.get(), p_37439_ , p_37443_);
         this.startPosition = this.position();
+    }
+
+    private Vec3 getRandomDownwardDirection() {
+        RandomSource random = level().getRandom();
+
+        //double y = -random.nextDouble(); // Between -1 and 0
+        //double y = 0.25 - random.nextDouble() * 1.25;
+        double y = random.nextDouble() - 0.75;
+        double angle = random.nextDouble() * Math.PI * 2;
+
+        double horizontal = Math.sqrt(1 - y * y);
+
+        return new Vec3(
+                Math.cos(angle) * horizontal,
+                y,
+                Math.sin(angle) * horizontal
+        );
+    }
+
+    private void spawnSatellites() {
+        if (level().isClientSide()) return;
+
+        for (int i = 0; i < 14; i++) {
+            SatelliteProjectile satellite = new SatelliteProjectile(
+                    ModEntities.SATELLITEPROJECT.get(),
+                    level()
+            );
+
+            satellite.setPos(position());
+
+            Vec3 direction = getRandomDownwardDirection();
+
+            satellite.setDeltaMovement(direction.scale(0.85));
+
+            satellite.setOwner(getOwner());
+
+            level().addFreshEntity(satellite);
+        }
     }
 
 

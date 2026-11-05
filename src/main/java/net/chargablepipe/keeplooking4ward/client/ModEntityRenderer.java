@@ -26,6 +26,10 @@ public class ModEntityRenderer {
                 ModEntities.WRECKINGBALLPROJECT.get(),
                 ThrownItemRenderer::new
         );
+        event.registerEntityRenderer(
+                ModEntities.SATELLITEPROJECT.get(),
+                ThrownItemRenderer::new
+        );
     }
 
 

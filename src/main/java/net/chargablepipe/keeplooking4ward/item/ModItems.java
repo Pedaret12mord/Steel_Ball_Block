@@ -35,9 +35,9 @@ public class ModItems {
                     new Item.Properties().stacksTo(1)
             ));
 
-    public static final RegistryObject<Item> SATELLITE_FUNC = ITEMS.register("satellite_func",
+    public static final RegistryObject<Item> SATELLITE_FUNC = ITEMS.register("satellite2",
             () -> new SatelliteItem(
-                    new Item.Properties().stacksTo(1)
+                    new Item.Properties()
             ));
 
     public  static void register(IEventBus eventBus)
