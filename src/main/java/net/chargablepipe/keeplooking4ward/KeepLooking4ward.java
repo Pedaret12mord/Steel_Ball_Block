@@ -55,8 +55,8 @@ public class KeepLooking4ward
     {
         if(event.getTabKey() == CreativeModeTabs.COMBAT)
         {
-            event.accept(ModItems.STEELBALL);
-            event.accept(ModItems.WRECKING_BALL);
+            //event.accept(ModItems.STEELBALL);
+            //event.accept(ModItems.WRECKING_BALL);
             event.accept(ModItems.BOMB);
         }
         if(event.getTabKey() == CreativeModeTabs.INGREDIENTS)

@@ -13,11 +13,11 @@ public class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, KeepLooking4ward.MOD_ID);
 
-    public static final RegistryObject<Item> STEELBALL = ITEMS.register("steel_ball",
-            () -> new Item(new Item.Properties()));
+    //public static final RegistryObject<Item> STEELBALL = ITEMS.register("steel_ball",
+            //() -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<Item> WRECKING_BALL = ITEMS.register("wrecking_ball",
-            () -> new Item(new Item.Properties()));
+    //public static final RegistryObject<Item> WRECKING_BALL = ITEMS.register("wrecking_ball",
+            //() -> new Item(new Item.Properties()));
 
     public static final RegistryObject<Item> Satellite = ITEMS.register("satellite",
             () -> new Item(new Item.Properties()));

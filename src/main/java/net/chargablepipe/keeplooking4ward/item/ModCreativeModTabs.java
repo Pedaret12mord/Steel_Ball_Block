@@ -16,11 +16,9 @@ public class ModCreativeModTabs
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, KeepLooking4ward.MOD_ID);
 
     public static final RegistryObject<CreativeModeTab> STEEL_BALL_RUN_TAB = CREATIVE_MODE_TABS.register("steel_ball_run_tab",
-            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.STEELBALL.get()))
+            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.BOMB.get()))
                     .title(Component.translatable("creativetab.steel_ball_run_tab"))
                     .displayItems((p_270258_, p_259752_) -> {
-                        p_259752_.accept(ModItems.STEELBALL.get());
-                        p_259752_.accept(ModItems.WRECKING_BALL.get());
                         p_259752_.accept(ModItems.Satellite.get());
                         p_259752_.accept(ModItems.STEELBALLBASE.get());
                         p_259752_.accept(ModItems.BOMB.get());
