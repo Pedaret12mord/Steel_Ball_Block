@@ -1,8 +1,11 @@
 package net.chargablepipe.keeplooking4ward.entity.custom;
 
+import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -53,6 +56,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     public double blockStuckDuration;
     public double wholeDistance;
     public boolean hasStuckBefore;
+
+    private int maxSatellites = 14;
+    private int satellitesSpawned;
+    private int satelliteSpawnDelay = 1;
 
     @Override
     public void tick() {
@@ -106,13 +113,20 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 if (slowdownTick >= slowdownDuration) {
                     this.setDeltaMovement(Vec3.ZERO);
                     phase = FlightPhase.STOPPING;
-                    spawnSatellites();
+                    //spawnSatellites();
                 }
             }
 
             case STOPPING -> {
                 super.tick();
                 stopTicks++;
+
+                if (!level().isClientSide()) {
+                    if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
+                        spawnSatellites();
+                        satellitesSpawned++;
+                    }
+                }
 
                 // Time to return
                 if (stopTicks>= stopDuration) {
@@ -257,7 +271,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private void spawnSatellites() {
         if (level().isClientSide()) return;
 
-        for (int i = 0; i < 14; i++) {
+        //for (int i = 0; i < 14; i++) {
             SatelliteProjectile satellite = new SatelliteProjectile(
                     ModEntities.SATELLITEPROJECT.get(),
                     level()
@@ -272,7 +286,14 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
             satellite.setOwner(getOwner());
 
             level().addFreshEntity(satellite);
-        }
+
+        net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                net.minecraftforge.api.distmarker.Dist.CLIENT,
+                () -> () -> ClientChargeSound.start(SoundEvents.ITEM_PICKUP, false, (LivingEntity) getOwner()
+
+                )
+        );
+        //}
     }
 
 
