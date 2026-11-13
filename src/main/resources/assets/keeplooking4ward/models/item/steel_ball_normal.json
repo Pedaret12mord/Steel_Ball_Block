@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
+  "base": {
+    "parent": "keeplooking4ward:item/steel_ball_3d"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "keeplooking4ward:item/steel_ball_two_d"
+    },
+    "ground": {
+      "parent": "keeplooking4ward:item/steel_ball_two_d"
+    },
+    "fixed": {
+      "parent": "keeplooking4ward:item/steel_ball_two_d"
+    }
+  }
+}

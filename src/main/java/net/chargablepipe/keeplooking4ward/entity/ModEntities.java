@@ -17,7 +17,7 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<SteelBallProjectile>> STEELBALLPROJECT =
             ENTITY_TYPES.register("steel_ball_project", () -> EntityType.Builder.<SteelBallProjectile>of(SteelBallProjectile::new, MobCategory.MISC)
-                    .sized(0.4f, 0.4f).build("steel_ball_run"));
+                    .sized(0.1f, 0.1f).build("steel_ball_run"));
 
     public static final RegistryObject<EntityType<WreckingBallProjectile>> WRECKINGBALLPROJECT =
             ENTITY_TYPES.register("wrecking_ball_project", () -> EntityType.Builder.<WreckingBallProjectile>of(WreckingBallProjectile::new, MobCategory.MISC)

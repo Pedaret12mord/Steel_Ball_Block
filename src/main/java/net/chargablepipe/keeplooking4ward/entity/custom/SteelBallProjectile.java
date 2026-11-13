@@ -54,6 +54,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     public double blockStuckDuration;
     private final int damageInterval = 10; // Damage every second
     private final float stuckDamage = 1.0F; // 1 heart
+    private Vec3 stuckOffset;
     public double wholeDistance;
     public boolean hasStuckBefore;
 
@@ -80,6 +81,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 }
 
                 if (distance >= outboundDistance) {
+                    System.out.println("slow");
                     phase = FlightPhase.SLOWING_DOWN;
                     slowdownStartVelocity = this.getDeltaMovement();
                 }
@@ -108,6 +110,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
                 if (slowdownTick >= slowdownDuration) {
                     this.setDeltaMovement(Vec3.ZERO);
+                    System.out.println("return");
                     phase = FlightPhase.RETURNING;
                 }
             }
@@ -117,6 +120,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 super.tick();
 
                 if (stuckEntity == null || !stuckEntity.isAlive()) {
+                    System.out.println("return");
                     phase = FlightPhase.RETURNING;
                     return;
                 }
@@ -125,13 +129,13 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
                 // Attach the projectile to the entity
 
-                Vec3 attachedPosition = stuckEntity.position().add(
-                        0,
-                        stuckEntity.getBbHeight() * 0.5,
-                        0
-                );
+                //Vec3 attachedPosition = stuckEntity.position().add(
+                        //0,
+                        //stuckEntity.getBbHeight() * 0.5,
+                        //0
+                //);
 
-                this.setPos(attachedPosition);
+                this.setPos(stuckEntity.position().add(stuckOffset));
 
                 // Immobilize the entity
                 stuckEntity.setDeltaMovement(new Vec3(0,stuckEntity.getDeltaMovement().y,0));
@@ -147,6 +151,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
                 // Time to return
                 if (stuckTicks >= stuckDuration) {
+                    System.out.println("return");
                     phase = FlightPhase.RETURNING;
                 }
             }
@@ -181,6 +186,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 super.tick();
                 if (stuckBlock == null)
                 {
+                    System.out.println("return");
                     phase = FlightPhase.RETURNING;
                     return;
                 }
@@ -202,6 +208,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                     //stuckBlock.getBlock().destroy(level(), blockPosStuck, stuckBlock);
                     level().destroyBlock(blockPosStuck, true);
                     blockStuckTick = 0;
+                    System.out.println("return");
                     phase = FlightPhase.RETURNING;
                 }
             }
@@ -316,8 +323,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             return;
         }
 
+        stuckOffset = this.position().subtract(stuckEntity.position());
+
         stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
 
+        System.out.println("stuck");
         phase = FlightPhase.STUCK;
         stuckTicks = 0;
 

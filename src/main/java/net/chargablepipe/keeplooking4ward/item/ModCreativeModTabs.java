@@ -22,6 +22,7 @@ public class ModCreativeModTabs
                         p_259752_.accept(ModItems.Satellite.get());
                         p_259752_.accept(ModItems.STEELBALLBASE.get());
                         p_259752_.accept(ModItems.STEELBALL.get());
+                        p_259752_.accept(ModItems.STEELBALLTHREED.get());
                         p_259752_.accept(ModItems.WRECKING_BALL.get());
                     })
                     .build());
