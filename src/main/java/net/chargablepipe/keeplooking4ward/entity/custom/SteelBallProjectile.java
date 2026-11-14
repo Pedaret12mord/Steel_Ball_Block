@@ -1,8 +1,12 @@
 package net.chargablepipe.keeplooking4ward.entity.custom;
 
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
+import net.chargablepipe.keeplooking4ward.particle.ModParticles;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -10,6 +14,7 @@ import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -30,6 +35,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         STRONGBLOCKSTOCK,
         RETURNING
     }
+
 
     private FlightPhase phase = FlightPhase.OUTBOUND;
     private FlightPhase previousPhase = phase;
@@ -54,12 +60,34 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     public double blockStuckDuration;
     private final int damageInterval = 10; // Damage every second
     private final float stuckDamage = 1.0F; // 1 heart
-    private Vec3 stuckOffset;
+    //private Vec3 stuckOffset;
     public double wholeDistance;
     public boolean hasStuckBefore;
 
+    public  boolean particleSpawned = false;
+
     @Override
     public void tick() {
+
+        if(!level().isClientSide() && level() instanceof ServerLevel serverLevel)
+        {
+            Vec3 direction = getDeltaMovement().normalize();
+
+            Vec3 center = position().add(0, getBbHeight()/ 2.0, 0);
+
+            double distance = 0.6;
+
+            Vec3 front = center.add(direction.scale(distance));
+            Vec3 back = center.subtract(direction.scale(distance));
+
+            if(particleSpawned == false)
+            {
+                serverLevel.sendParticles(ModParticles.SPIN.get(),
+                        back.x, back.y, back.z,
+                        1, 0, 0, 0, 0);
+                particleSpawned = true;
+            }
+        }
         switch (phase) {
 
             // PHASE 1: Fly forward
@@ -129,13 +157,13 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
                 // Attach the projectile to the entity
 
-                //Vec3 attachedPosition = stuckEntity.position().add(
-                        //0,
-                        //stuckEntity.getBbHeight() * 0.5,
-                        //0
-                //);
+                Vec3 attachedPosition = stuckEntity.position().add(
+                        0,
+                        stuckEntity.getBbHeight() * 0.5,
+                        0
+                );
 
-                this.setPos(stuckEntity.position().add(stuckOffset));
+                //this.setPos(stuckEntity.position().add(stuckOffset));
 
                 // Immobilize the entity
                 stuckEntity.setDeltaMovement(new Vec3(0,stuckEntity.getDeltaMovement().y,0));
@@ -323,7 +351,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             return;
         }
 
-        stuckOffset = this.position().subtract(stuckEntity.position());
+        //stuckOffset = this.position().subtract(stuckEntity.position());
 
         stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
 

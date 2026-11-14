@@ -4,8 +4,11 @@ import com.mojang.logging.LogUtils;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModCreativeModTabs;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
+import net.chargablepipe.keeplooking4ward.particle.ModParticles;
+import net.chargablepipe.keeplooking4ward.particle.SpinParticles;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -35,6 +38,8 @@ public class KeepLooking4ward
         ModEntities.register(FMLJavaModLoadingContext.get().getModEventBus());
 
         ModItems.register(modEventBus);
+
+        ModParticles.register(modEventBus);
         //IEventBus modEventBus = context.getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
@@ -81,6 +86,12 @@ public class KeepLooking4ward
         public static void onClientSetup(FMLClientSetupEvent event)
         {
 
+        }
+
+        @SubscribeEvent
+        public static void registerParticleProvider(RegisterParticleProvidersEvent event)
+        {
+            event.registerSpriteSet(ModParticles.SPIN.get(), SpinParticles.Provider::new);
         }
     }
 }
