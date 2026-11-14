@@ -19,16 +19,31 @@ public class SpinParticles extends TextureSheetParticle {
 
     private static final int FRAME_COUNT = 8;
     private static final int FRAME_PER_TICK = 1;
-    protected SpinParticles(ClientLevel p_108328_, double p_108329_, double p_108330_, double p_108331_,
-                            SpriteSet spriteSet, double p_108332_, double p_108333_, double p_108334_) {
+
+    private final int entityId;
+    private int waitTicks = 0;
+    private boolean hasAttached = false;
+
+    protected SpinParticles(ClientLevel p_108328_,
+                            double p_108329_,
+                            double p_108330_,
+                            double p_108331_,
+                            SpriteSet spriteSet,
+                            double p_108332_,
+                            double p_108333_,
+                            double p_108334_,
+                            int entityId) {
         super(p_108328_, p_108329_, p_108330_, p_108331_, p_108332_, p_108333_, p_108334_);
 
         this.spriteSet = spriteSet;
         this.friction = 0.5f;
         this.lifetime = 7200;
         this.gravity = 0;
+        this.entityId = entityId;
 
         this.setSprite(spriteSet.get(0, FRAME_COUNT));
+
+        this.quadSize = 0.33f;
 
         //this.setSpriteFromAge(spriteSet);
 
@@ -41,17 +56,25 @@ public class SpinParticles extends TextureSheetParticle {
     public void tick() {
         super.tick();
 
-        if(attachedEntity == null || attachedEntity.isRemoved())
-        {
-            this.remove();;
-            return;
-        }
-        if(this.removed)
-        {
+        if (this.removed) return;
+
+        attachedEntity = this.level.getEntity(entityId);
+
+        if (attachedEntity == null) {
+            if (hasAttached || ++waitTicks > 20) {
+                this.remove();
+            }
             return;
         }
 
-        this.setPos(attachedEntity.getX(), attachedEntity.getY() + attachedEntity.getBbHeight()/2, attachedEntity.getZ());
+        if (attachedEntity.isRemoved()) {
+            this.remove();
+            return;
+        }
+
+        hasAttached = true;
+
+        this.setPos(attachedEntity.getX(), attachedEntity.getY() + (2*attachedEntity.getBbHeight()/3), attachedEntity.getZ());
 
         int frame = (this.age * FRAME_PER_TICK) % FRAME_COUNT;
 
@@ -69,7 +92,7 @@ public class SpinParticles extends TextureSheetParticle {
         //return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
-    public static class Provider implements ParticleProvider<SimpleParticleType>{
+    public static class Provider implements ParticleProvider<AttachedParticleOptions>{
         private final SpriteSet spriteSet;
 
         public Provider(SpriteSet spriteSet) {
@@ -78,11 +101,28 @@ public class SpinParticles extends TextureSheetParticle {
 
         @Override
         @Nullable
-        public Particle createParticle(SimpleParticleType p_107421_, ClientLevel p_107422_, double p_107423_,
-                                       double p_107424_, double p_107425_, double p_107426_,
-                                       double p_107427_, double p_107428_) {
-            return new SpinParticles(p_107422_, p_107423_, p_107424_, p_107425_, this.spriteSet, p_107426_,
-                    p_107427_, p_107428_);
+        public Particle createParticle(
+                AttachedParticleOptions p_107421_,
+                ClientLevel p_107422_,
+                double p_107423_,
+                double p_107424_,
+                double p_107425_,
+                double p_107426_,
+                double p_107427_,
+                double p_107428_
+        )
+        {
+            return new SpinParticles(
+                    p_107422_,
+                    p_107423_,
+                    p_107424_,
+                    p_107425_,
+                    this.spriteSet,
+                    p_107426_,
+                    p_107427_,
+                    p_107428_,
+                    p_107421_.getEntityId()
+            );
         }
 
     }

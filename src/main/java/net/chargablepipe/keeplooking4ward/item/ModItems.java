@@ -2,6 +2,7 @@ package net.chargablepipe.keeplooking4ward.item;
 import net.chargablepipe.keeplooking4ward.KeepLooking4ward;
 import net.chargablepipe.keeplooking4ward.item.custom.SteelBallItem;
 import net.chargablepipe.keeplooking4ward.item.custom.SatelliteItem;
+import net.chargablepipe.keeplooking4ward.item.custom.SteelBallNormalItem;
 import net.chargablepipe.keeplooking4ward.item.custom.WreckingItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -30,10 +31,16 @@ public class ModItems {
                             new Item.Properties().stacksTo(1)
                     ));
 
+    //public static final RegistryObject<Item> STEELBALLTHREED = ITEMS.register("steel_ball_3d",
+            //() -> new SteelBallNormalItem(
+                    //new Item.Properties().stacksTo(1)
+            //));
+
     public static final RegistryObject<Item> STEELBALLTHREED = ITEMS.register("steel_ball_normal",
-            () -> new SteelBallItem(
+            () -> new SteelBallNormalItem(
                     new Item.Properties().stacksTo(1)
             ));
+
 
     public static final RegistryObject<Item> WRECKING_BALL = ITEMS.register("wrecking_ball",
             () -> new WreckingItem(
@@ -43,6 +50,10 @@ public class ModItems {
     public static final RegistryObject<Item> SATELLITE_FUNC = ITEMS.register("satellite2",
             () -> new SatelliteItem(
                     new Item.Properties()
+            ));
+
+    public static final RegistryObject<Item> ANIMATED_BALL = ITEMS.register("animated_ball",
+            () -> new Item( new Item.Properties()
             ));
 
     public  static void register(IEventBus eventBus)

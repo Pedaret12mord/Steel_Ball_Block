@@ -2,6 +2,7 @@ package net.chargablepipe.keeplooking4ward.entity;
 
 import net.chargablepipe.keeplooking4ward.KeepLooking4ward;
 import net.chargablepipe.keeplooking4ward.entity.custom.SatelliteProjectile;
+import net.chargablepipe.keeplooking4ward.entity.custom.SteelBallNormalProjectile;
 import net.chargablepipe.keeplooking4ward.entity.custom.SteelBallProjectile;
 import net.chargablepipe.keeplooking4ward.entity.custom.WreckingBallProjectile;
 import net.minecraft.world.entity.EntityType;
@@ -17,6 +18,10 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<SteelBallProjectile>> STEELBALLPROJECT =
             ENTITY_TYPES.register("steel_ball_project", () -> EntityType.Builder.<SteelBallProjectile>of(SteelBallProjectile::new, MobCategory.MISC)
+                    .sized(0.1f, 0.1f).build("steel_ball_run"));
+
+    public static final RegistryObject<EntityType<SteelBallNormalProjectile>> STEELBALLNORMALPROJECT =
+            ENTITY_TYPES.register("steel_ball_normal_project", () -> EntityType.Builder.<SteelBallNormalProjectile>of(SteelBallNormalProjectile::new, MobCategory.MISC)
                     .sized(0.1f, 0.1f).build("steel_ball_run"));
 
     public static final RegistryObject<EntityType<WreckingBallProjectile>> WRECKINGBALLPROJECT =

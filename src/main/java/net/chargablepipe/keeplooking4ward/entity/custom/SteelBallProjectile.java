@@ -1,6 +1,7 @@
 package net.chargablepipe.keeplooking4ward.entity.custom;
 
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
+import net.chargablepipe.keeplooking4ward.particle.AttachedParticleOptions;
 import net.chargablepipe.keeplooking4ward.particle.ModParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -82,9 +83,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
             if(particleSpawned == false)
             {
-                serverLevel.sendParticles(ModParticles.SPIN.get(),
+                serverLevel.sendParticles(
+                        new AttachedParticleOptions(this.getId()),
                         back.x, back.y, back.z,
-                        1, 0, 0, 0, 0);
+                        1, 0, 0, 0, 0
+                );
                 particleSpawned = true;
             }
         }
@@ -162,6 +165,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                         stuckEntity.getBbHeight() * 0.5,
                         0
                 );
+                this.setPos(attachedPosition);
 
                 //this.setPos(stuckEntity.position().add(stuckOffset));
 
