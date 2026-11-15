@@ -28,6 +28,11 @@ public class ModItems {
                             new Item.Properties().stacksTo(1)
                     ));
 
+    public static final RegistryObject<Item> BOMB = ITEMS.register("steel_ball_bomb",
+            () -> new SteelBallItem(
+                    new Item.Properties().stacksTo(1)
+            ));
+
     //public static final RegistryObject<Item> STEELBALLTHREED = ITEMS.register("steel_ball_3d",
             //() -> new SteelBallNormalItem(
                     //new Item.Properties().stacksTo(1)

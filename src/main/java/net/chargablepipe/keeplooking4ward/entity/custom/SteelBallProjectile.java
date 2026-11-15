@@ -7,10 +7,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
@@ -32,8 +34,10 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         OUTBOUND,
         SLOWING_DOWN,
         STUCK,
+        BALLSTUCK,
         WEAKBLOCKSTOCK,
         STRONGBLOCKSTOCK,
+        COLLIDER,
         RETURNING
     }
 
@@ -67,6 +71,9 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
     public  boolean particleSpawned = false;
 
+    public Vec3 velocity;
+    public int collStopTicks;
+
     @Override
     public void tick() {
 
@@ -90,6 +97,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 );
                 particleSpawned = true;
             }
+            serverLevel.sendParticles(
+                    new SimpleParticleType(true),
+                    back.x, back.y, back.z,
+                    1,0,0,0,0
+            );
         }
         switch (phase) {
 
@@ -97,7 +109,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             case OUTBOUND -> {
                 super.tick();
 
-
+                velocity = this.velocity;
                 double distance;
                 if(!hasStuckBefore)
                 {
@@ -188,6 +200,38 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 }
             }
 
+            case BALLSTUCK -> {
+
+                super.tick();
+
+                stuckTicks++;
+
+                // Attach the projectile to the entity
+
+                //Vec3 attachedPosition = stuckEntity.position().add(
+                        //0,
+                        //stuckEntity.getBbHeight() * 0.5,
+                        //0
+                //);
+                //this.setPos(attachedPosition);
+
+
+                // Immobilize the entity
+                this.setDeltaMovement(new Vec3(0,0,0));
+
+                this.noPhysics = true;
+
+                // Time to return
+                if (stuckTicks >= stuckDuration) {
+                    if(previousPhase == FlightPhase.OUTBOUND)
+                    {
+                        setDeltaMovement(velocity);
+                    }
+                    noPhysics = false;
+                    phase = previousPhase;
+                }
+            }
+
             case WEAKBLOCKSTOCK -> {
                 super.tick();
                 if (stuckBlock == null)
@@ -243,6 +287,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                     System.out.println("return");
                     phase = FlightPhase.RETURNING;
                 }
+            }
+
+            case COLLIDER -> {
+
+
             }
 
             // PHASE 3: Return to the player
@@ -308,7 +357,13 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
     @Override
     protected Item getDefaultItem() {
-        return ModItems.STEELBALL.get();
+        return ModItems.BOMB.get();
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        return super.canHitEntity(entity)
+                && entity instanceof Projectile;
     }
 
     @Override
@@ -356,7 +411,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         }
 
         //stuckOffset = this.position().subtract(stuckEntity.position());
-
+        if(stuckEntity instanceof SteelBallProjectile steelBall || stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            phase = FlightPhase.BALLSTUCK;
+            velocity = this.getDeltaMovement();
+        }
         stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
 
         System.out.println("stuck");
