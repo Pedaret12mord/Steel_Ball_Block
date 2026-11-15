@@ -109,7 +109,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             case OUTBOUND -> {
                 super.tick();
 
-                velocity = this.velocity;
+                velocity = this.getDeltaMovement();
                 double distance;
                 if(!hasStuckBefore)
                 {
@@ -218,8 +218,10 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
                 // Immobilize the entity
                 this.setDeltaMovement(new Vec3(0,0,0));
+                stuckEntity.setDeltaMovement(new Vec3(0,0,0));
 
                 this.noPhysics = true;
+                stuckEntity.noPhysics = true;
 
                 // Time to return
                 if (stuckTicks >= stuckDuration) {
@@ -227,7 +229,15 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                     {
                         setDeltaMovement(velocity);
                     }
+                    if(stuckEntity instanceof SteelBallProjectile steelBall)
+                    {
+                        if(steelBall.previousPhase == FlightPhase.OUTBOUND)
+                        {
+                            stuckEntity.setDeltaMovement(steelBall.velocity);
+                        }
+                    }
                     noPhysics = false;
+                    stuckEntity.noPhysics = false;
                     phase = previousPhase;
                 }
             }
