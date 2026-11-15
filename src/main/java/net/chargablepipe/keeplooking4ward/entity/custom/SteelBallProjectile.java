@@ -362,8 +362,14 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return super.canHitEntity(entity)
-                && entity instanceof Projectile;
+
+        if (entity instanceof Projectile) {
+            return entity.isAlive()
+                    && entity != this
+                    && entity != getOwner();
+        }
+
+        return super.canHitEntity(entity);
     }
 
     @Override
@@ -415,6 +421,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         {
             phase = FlightPhase.BALLSTUCK;
             velocity = this.getDeltaMovement();
+            return;
         }
         stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
 
