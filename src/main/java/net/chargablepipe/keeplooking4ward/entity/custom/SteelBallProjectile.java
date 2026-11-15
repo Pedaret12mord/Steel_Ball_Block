@@ -202,26 +202,15 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
             case BALLSTUCK -> {
 
-                super.tick();
-
                 stuckTicks++;
 
-                // Attach the projectile to the entity
-
-                //Vec3 attachedPosition = stuckEntity.position().add(
-                        //0,
-                        //stuckEntity.getBbHeight() * 0.5,
-                        //0
-                //);
-                //this.setPos(attachedPosition);
-
-
-                // Immobilize the entity
                 this.setDeltaMovement(new Vec3(0,0,0));
-                stuckEntity.setDeltaMovement(new Vec3(0,0,0));
+                //stuckEntity.setDeltaMovement(new Vec3(0,0,0));
 
                 this.noPhysics = true;
-                stuckEntity.noPhysics = true;
+
+                super.tick();
+                //stuckEntity.noPhysics = true;
 
                 // Time to return
                 if (stuckTicks >= stuckDuration) {
@@ -229,15 +218,15 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                     {
                         setDeltaMovement(velocity);
                     }
-                    if(stuckEntity instanceof SteelBallProjectile steelBall)
-                    {
-                        if(steelBall.previousPhase == FlightPhase.OUTBOUND)
-                        {
-                            stuckEntity.setDeltaMovement(steelBall.velocity);
-                        }
-                    }
+                    //if(stuckEntity instanceof SteelBallProjectile steelBall)
+                    //{
+                        //if(steelBall.previousPhase == FlightPhase.OUTBOUND)
+                        //{
+                            //stuckEntity.setDeltaMovement(steelBall.velocity);
+                        //}
+                    //}
                     noPhysics = false;
-                    stuckEntity.noPhysics = false;
+                    //stuckEntity.noPhysics = false;
                     phase = previousPhase;
                 }
             }
@@ -427,11 +416,29 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         }
 
         //stuckOffset = this.position().subtract(stuckEntity.position());
-        if(stuckEntity instanceof SteelBallProjectile steelBall || stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        if(stuckEntity instanceof SteelBallProjectile steelBall) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
         {
             phase = FlightPhase.BALLSTUCK;
             velocity = this.getDeltaMovement();
+            steelBall.phase = FlightPhase.BALLSTUCK;
+            steelBall.velocity = steelBall.getDeltaMovement();
             return;
+            //previousPhase = phase;
+            //phase = FlightPhase.BALLSTUCK;
+            //velocity = this.getDeltaMovement();
+            //stuckTicks = 0;
+            //noPhysics = true;
+            //setDeltaMovement(Vec3.ZERO);
+
+            // Other projectile
+            //steelBall.previousPhase = steelBall.phase;
+            //steelBall.phase = FlightPhase.BALLSTUCK;
+            //steelBall.velocity = steelBall.getDeltaMovement();
+            //steelBall.stuckTicks = 0;
+            //steelBall.noPhysics = true;
+            //steelBall.setDeltaMovement(Vec3.ZERO);
+
+            //return;
         }
         stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
 
