@@ -30,7 +30,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     private Vec3 startPosition;
     private Vec3 slowdownStartVelocity;
 
-    private enum FlightPhase {
+    public enum FlightPhase {
         OUTBOUND,
         SLOWING_DOWN,
         STUCK,
@@ -42,13 +42,13 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     }
 
 
-    private FlightPhase phase = FlightPhase.OUTBOUND;
-    private FlightPhase previousPhase = phase;
+    public FlightPhase phase = FlightPhase.OUTBOUND;
+    public FlightPhase previousPhase = phase;
 
     private int slowdownTick = 0;
 
     // Configuration
-    private final double outboundDistance = 25.0;
+    private double outboundDistance = 25.0;
     private final int slowdownDuration = 15;
     private final double returnSpeed = 1.2;
 
@@ -72,7 +72,6 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     public  boolean particleSpawned = false;
 
     public Vec3 velocity;
-    public int collStopTicks;
 
     @Override
     public void tick() {
@@ -333,6 +332,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         }
     }
 
+    public void setMaxDistance(double distance)
+    {
+        this.outboundDistance = distance;
+    }
+
     public SteelBallProjectile(EntityType<? extends ThrowableItemProjectile> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
         this.startPosition = this.position();
@@ -436,6 +440,16 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             //steelBall.setDeltaMovement(Vec3.ZERO);
 
             //return;
+        }
+        if(stuckEntity instanceof WreckingBallProjectile wreck) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            previousPhase = phase;
+            velocity = this.getDeltaMovement();
+            phase = FlightPhase.BALLSTUCK;
+            wreck.previousPhase = wreck.phase;
+            wreck.velocity = wreck.getDeltaMovement();
+            wreck.phase = FlightPhase.BALLSTUCK;
+            return;
         }
         stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
 

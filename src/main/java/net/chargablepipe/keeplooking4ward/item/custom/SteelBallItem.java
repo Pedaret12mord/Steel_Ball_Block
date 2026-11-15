@@ -7,6 +7,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.sounds.SoundEvents;
@@ -31,7 +32,7 @@ public class SteelBallItem extends Item {
         if (level.isClientSide) {
             int ticksUsed = getUseDuration(stack) - remainingUseDuration;
 
-            if (ticksUsed == 14) {
+            if (ticksUsed == 11) {
                 net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
                         net.minecraftforge.api.distmarker.Dist.CLIENT,
                         () -> () -> ClientChargeSound.start(
@@ -58,12 +59,18 @@ public class SteelBallItem extends Item {
         return 72000;
     }
 
+    //@Override
+    //public UseAnim getUseAnimation(ItemStack p_41452_) {
+        //return UseAnim.BOW;
+    //}
+
     @Override
     public void releaseUsing(
             ItemStack stack,
             Level level,
             LivingEntity entity,
-            int timeLeft) {
+            //int timeLeft,
+            int remainingUseDuration) {
 
 
         if (level.isClientSide) {
@@ -86,10 +93,18 @@ public class SteelBallItem extends Item {
             );
         }
 
+        int ticksUsed = getUseDuration(stack) - remainingUseDuration;
+
+        //double maxDistance = 11 + (Math.max(0, ticksUsed - 11) * 8 / 46);
+        double maxDistance = 11 + (Math.max(0, ticksUsed - 11) * 10 / 60);
+        maxDistance = Math.min(maxDistance, 21);
+
         // Put your projectile-shooting code here.
         if (!level.isClientSide() && entity instanceof Player player) {
 
             SteelBallProjectile projectile = new SteelBallProjectile(level, player);
+
+            projectile.setMaxDistance(maxDistance);
 
             // Set the projectile's initial position
             projectile.setPos(

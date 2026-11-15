@@ -24,17 +24,18 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private Vec3 startPosition;
     private Vec3 slowdownStartVelocity;
 
-    private enum FlightPhase {
+    public enum FlightPhase {
         OUTBOUND,
         SLOWING_DOWN,
         WEAKBLOCKSTOCK,
         STRONGBLOCKSTOCK,
         RETURNING,
-        STOPPING
+        STOPPING,
+        BALLSTUCK
     }
 
-    private FlightPhase phase = FlightPhase.OUTBOUND;
-    private FlightPhase previousPhase = phase;
+    public FlightPhase phase = FlightPhase.OUTBOUND;
+    public FlightPhase previousPhase = phase;
 
     private int slowdownTick = 0;
 
@@ -60,6 +61,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private int maxSatellites = 14;
     private int satellitesSpawned;
     private int satelliteSpawnDelay = 1;
+    public Vec3 velocity;
 
     @Override
     public void tick() {
@@ -340,6 +342,27 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
         stuckEntity = p_37259_.getEntity();
 
         if (stuckEntity == this.getOwner()) {
+            return;
+        }
+
+        if(stuckEntity instanceof SteelBallProjectile steelBall) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            previousPhase = phase;
+            velocity = this.getDeltaMovement();
+            phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
+            steelBall.previousPhase = steelBall.phase;
+            steelBall.velocity = steelBall.getDeltaMovement();
+            steelBall.phase = SteelBallProjectile.FlightPhase.BALLSTUCK;
+            return;
+        }
+        if(stuckEntity instanceof WreckingBallProjectile wreck) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            previousPhase = phase;
+            velocity = this.getDeltaMovement();
+            phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
+            wreck.previousPhase = wreck.phase;
+            wreck.velocity = wreck.getDeltaMovement();
+            wreck.phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
             return;
         }
 
