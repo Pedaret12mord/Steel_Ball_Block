@@ -448,7 +448,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             phase = FlightPhase.BALLSTUCK;
             wreck.previousPhase = wreck.phase;
             wreck.velocity = wreck.getDeltaMovement();
-            wreck.phase = FlightPhase.BALLSTUCK;
+            wreck.phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
             return;
         }
         stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);

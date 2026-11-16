@@ -1,6 +1,7 @@
 package net.chargablepipe.keeplooking4ward.item;
 import net.chargablepipe.keeplooking4ward.KeepLooking4ward;
 import net.chargablepipe.keeplooking4ward.item.custom.*;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -23,7 +24,7 @@ public class ModItems {
     public static final RegistryObject<Item> STEELBALLBASE = ITEMS.register("steel_ball_base",
             () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<Item> STEELBALL = ITEMS.register("steel_ball",
+    public static final RegistryObject<Item> STEELBALL = ITEMS.register("steel_ball_static",
                     () -> new SteelBallItem(
                             new Item.Properties().stacksTo(1)
                     ));
@@ -32,6 +33,7 @@ public class ModItems {
             () -> new SteelBallItem(
                     new Item.Properties().stacksTo(1)
             ));
+
 
     //public static final RegistryObject<Item> STEELBALLTHREED = ITEMS.register("steel_ball_3d",
             //() -> new SteelBallNormalItem(
