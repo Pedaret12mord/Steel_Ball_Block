@@ -37,14 +37,22 @@ public class WreckingItem extends Item {
             ItemStack stack,
             Level level,
             LivingEntity entity,
-            int timeLeft) {
+            //int timeLeft,
+            int remainingUseDuration) {
 
 
+        int ticksUsed = getUseDuration(stack) - remainingUseDuration;
+
+        //double maxDistance = 11 + (Math.max(0, ticksUsed - 11) * 8 / 46);
+        double maxDistance = 2 + (Math.max(0, ticksUsed - 2) * 10 / 60);
+        maxDistance = Math.min(maxDistance, 10);
 
         // Put your projectile-shooting code here.
         if (!level.isClientSide() && entity instanceof Player player) {
 
             WreckingBallProjectile projectile = new WreckingBallProjectile(level, player);
+
+            projectile.setMaxDistance(maxDistance);
 
             // Set the projectile's initial position
             projectile.setPos(

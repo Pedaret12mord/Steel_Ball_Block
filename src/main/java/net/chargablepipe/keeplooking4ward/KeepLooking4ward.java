@@ -5,6 +5,7 @@ import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModCreativeModTabs;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
 import net.chargablepipe.keeplooking4ward.particle.ModParticles;
+import net.chargablepipe.keeplooking4ward.particle.RippleParticles;
 import net.chargablepipe.keeplooking4ward.particle.SpinParticles;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
@@ -92,6 +93,7 @@ public class KeepLooking4ward
         public static void registerParticleProvider(RegisterParticleProvidersEvent event)
         {
             event.registerSpriteSet(ModParticles.SPIN.get(), SpinParticles.Provider::new);
+            event.registerSpriteSet(ModParticles.RIPPLE.get(), RippleParticles.Provider::new);
         }
     }
 }

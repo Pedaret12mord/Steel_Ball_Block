@@ -32,6 +32,23 @@ public class ModParticles {
                     }
             );
 
+    public static final RegistryObject<ParticleType<AttachedRippleParticleOptions>> RIPPLE =
+            PARTICLE_TYPES.register("ripple", () ->
+                    new ParticleType<AttachedRippleParticleOptions>(
+                            false,
+                            AttachedRippleParticleOptions.DESERIALIZER
+                    ) {
+                        @Override
+                        public Codec<AttachedRippleParticleOptions> codec() {
+                            return Codec.INT.xmap(
+                                    AttachedRippleParticleOptions::new,
+                                    AttachedRippleParticleOptions::getEntityId
+                            );
+                        }
+                    }
+            );
+
+
     public static void register(IEventBus eventBus) {
         PARTICLE_TYPES.register(eventBus);
     }

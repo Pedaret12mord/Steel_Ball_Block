@@ -2,6 +2,7 @@ package net.chargablepipe.keeplooking4ward.entity.custom;
 
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.particle.AttachedParticleOptions;
+import net.chargablepipe.keeplooking4ward.particle.AttachedRippleParticleOptions;
 import net.chargablepipe.keeplooking4ward.particle.ModParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -9,8 +10,12 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
@@ -70,6 +75,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     public boolean hasStuckBefore;
 
     public  boolean particleSpawned = false;
+    public  boolean rippleParticleSpawned = false;
 
     public Vec3 velocity;
 
@@ -96,11 +102,20 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 );
                 particleSpawned = true;
             }
-            serverLevel.sendParticles(
-                    new SimpleParticleType(true),
-                    back.x, back.y, back.z,
-                    1,0,0,0,0
-            );
+            //serverLevel.sendParticles(
+                    //ParticleTypes.DOLPHIN,
+                    //back.x, back.y, back.z,
+                    //1,0,0,0,0
+           // );
+            if(rippleParticleSpawned == false)
+            {
+                serverLevel.sendParticles(
+                        new AttachedRippleParticleOptions(this.getId()),
+                        back.x, back.y, back.z,
+                        1, 0, 0, 0, 0
+                );
+                rippleParticleSpawned = true;
+            }
         }
         switch (phase) {
 
@@ -181,15 +196,50 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 //this.setPos(stuckEntity.position().add(stuckOffset));
 
                 // Immobilize the entity
-                stuckEntity.setDeltaMovement(new Vec3(0,stuckEntity.getDeltaMovement().y,0));
+
 
                 // Damage the entity periodically (server only)
                 if (!this.level().isClientSide() && stuckTicks % damageInterval == 0) {
+                    if(stuckEntity instanceof AbstractHorse horse && horse.isTamed() &&
+                            stuckEntity instanceof LivingEntity livingEntity)
+                    {
+                        livingEntity.heal(2);
+                        horse.addEffect(new MobEffectInstance(
+                                MobEffects.MOVEMENT_SPEED,
+                                10,
+                                1
+                        ));
+                    }
+                    else
+                    {
+                        stuckEntity.setDeltaMovement(new Vec3(0,stuckEntity.getDeltaMovement().y,0));
+                        stuckEntity.hurt(
+                                this.damageSources().thrown(this, this.getOwner()),
+                                stuckDamage
+                        );
+                    }
+                }
 
-                    stuckEntity.hurt(
-                            this.damageSources().thrown(this, this.getOwner()),
-                            stuckDamage
-                    );
+                if(!level().isClientSide() && level() instanceof ServerLevel serverLevel)
+                {
+                    Vec3 direction = getDeltaMovement().normalize();
+
+                    Vec3 center = position().add(0, getBbHeight()/ 2.0, 0);
+
+                    double distance = 0.6;
+
+                    Vec3 front = center.add(direction.scale(distance));
+                    Vec3 back = center.subtract(direction.scale(distance));
+
+                    //if(rippleParticleSpawned == false)
+                    //{
+                        //serverLevel.sendParticles(
+                                //new AttachedRippleParticleOptions(this.getId()),
+                                //back.x, back.y, back.z,
+                                //1, 0, 0, 0, 0
+                       // );
+                        //rippleParticleSpawned = true;
+                    //}
                 }
 
                 // Time to return
@@ -280,11 +330,6 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                     System.out.println("return");
                     phase = FlightPhase.RETURNING;
                 }
-            }
-
-            case COLLIDER -> {
-
-
             }
 
             // PHASE 3: Return to the player
@@ -447,11 +492,14 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             velocity = this.getDeltaMovement();
             phase = FlightPhase.BALLSTUCK;
             wreck.previousPhase = wreck.phase;
-            wreck.velocity = wreck.getDeltaMovement();
+            //wreck.velocity = wreck.getDeltaMovement();
             wreck.phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
             return;
         }
-        stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
+        if(stuckEntity instanceof AbstractHorse horse && horse.isTamed())
+        {
+            stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
+        }
 
         System.out.println("stuck");
         phase = FlightPhase.STUCK;

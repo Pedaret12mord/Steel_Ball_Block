@@ -34,6 +34,17 @@ public class ModItemProperties {
                     }
             );
 
+            ItemProperties.register(
+                    ModItems.WRECKING_BALL.get(),
+                    new ResourceLocation(KeepLooking4ward.MOD_ID, "charging"),
+                    (stack, level, entity, seed) -> {
+                        return entity != null
+                                && entity.isUsingItem()
+                                && entity.getUseItem() == stack
+                                ? 1.0F : 0.0F;
+                    }
+            );
+
         });
     }
 }

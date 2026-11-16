@@ -24,7 +24,7 @@ public class ModItems {
     public static final RegistryObject<Item> STEELBALLBASE = ITEMS.register("steel_ball_base",
             () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<Item> STEELBALL = ITEMS.register("steel_ball_static",
+    public static final RegistryObject<Item> STEELBALL = ITEMS.register("steel_ball",
                     () -> new SteelBallItem(
                             new Item.Properties().stacksTo(1)
                     ));

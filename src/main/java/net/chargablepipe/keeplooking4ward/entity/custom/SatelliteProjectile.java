@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 public class SatelliteProjectile extends ThrowableItemProjectile {
 
     private Vec3 startPosition;
-    private float hitDamage = 3;
+    private float hitDamage = 5;
     private int effectDuration = 100;
     private int lifeTime = 50;
     private int lifeTimeTick =0;

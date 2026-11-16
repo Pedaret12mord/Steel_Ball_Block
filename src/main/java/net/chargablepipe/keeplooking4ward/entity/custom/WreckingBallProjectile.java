@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +41,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private int slowdownTick = 0;
 
     // Configuration
-    private final double outboundDistance = 7.0;
+    private double outboundDistance = 7.0;
     private final int slowdownDuration = 15;
     private final int stopDuration = 45;
     private final double returnSpeed = 1.2;
@@ -51,8 +52,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private BlockPos blockPosStuck;
 
     private int stopTicks = 0;
+    private int stuckTicks = 0;
     private int blockStuckTick = 0;
 
+    private final int stuckDuration = 100;
     private final int hardBlockStuckDuration = 100;
     public double blockStuckDuration;
     public double wholeDistance;
@@ -61,7 +64,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private int maxSatellites = 14;
     private int satellitesSpawned;
     private int satelliteSpawnDelay = 1;
-    public Vec3 velocity;
+    //public Vec3 velocity;
 
     @Override
     public void tick() {
@@ -133,6 +136,35 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 // Time to return
                 if (stopTicks>= stopDuration) {
                     phase = WreckingBallProjectile.FlightPhase.RETURNING;
+                }
+            }
+
+            case BALLSTUCK -> {
+
+                stuckTicks++;
+
+                this.setDeltaMovement(new Vec3(0,0,0));
+                //stuckEntity.setDeltaMovement(new Vec3(0,0,0));
+
+                this.noPhysics = true;
+
+                super.tick();
+                //stuckEntity.noPhysics = true;
+
+                if (!level().isClientSide()) {
+                    if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
+                        spawnSatellites();
+                        satellitesSpawned++;
+                    }
+                }
+
+                // Time to return
+                if (stuckTicks >= stuckDuration) {
+                    phase = FlightPhase.RETURNING;
+
+                    noPhysics = false;
+                    //phase = previousPhase;
+                    stuckEntity = null;
                 }
             }
 
@@ -237,6 +269,11 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
         }
     }
 
+    public void setMaxDistance(double distance)
+    {
+        this.outboundDistance = distance;
+    }
+
 
     public WreckingBallProjectile(EntityType<? extends ThrowableItemProjectile> p_37442_, Level p_37443_) {
         super(p_37442_, p_37443_);
@@ -305,6 +342,18 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     }
 
     @Override
+    protected boolean canHitEntity(Entity entity) {
+
+        if (entity instanceof Projectile) {
+            return entity.isAlive()
+                    && entity != this
+                    && entity != getOwner();
+        }
+
+        return super.canHitEntity(entity);
+    }
+
+    @Override
     protected float getGravity() {
         return 0;
     }
@@ -348,7 +397,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
         if(stuckEntity instanceof SteelBallProjectile steelBall) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
         {
             previousPhase = phase;
-            velocity = this.getDeltaMovement();
+            //velocity = this.getDeltaMovement();
             phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
             steelBall.previousPhase = steelBall.phase;
             steelBall.velocity = steelBall.getDeltaMovement();
@@ -358,15 +407,15 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
         if(stuckEntity instanceof WreckingBallProjectile wreck) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
         {
             previousPhase = phase;
-            velocity = this.getDeltaMovement();
+           // velocity = this.getDeltaMovement();
             phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
             wreck.previousPhase = wreck.phase;
-            wreck.velocity = wreck.getDeltaMovement();
+            //wreck.velocity = wreck.getDeltaMovement();
             wreck.phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
             return;
         }
 
-        stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
+        stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),5);
 
     }
 }
