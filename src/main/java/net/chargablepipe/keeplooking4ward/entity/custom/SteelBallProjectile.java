@@ -16,6 +16,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
@@ -24,12 +25,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
 import net.minecraft.world.phys.EntityHitResult;
+
+import java.awt.event.ItemEvent;
 
 public class SteelBallProjectile extends ThrowableItemProjectile {
     private Vec3 startPosition;
@@ -432,6 +436,22 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         hasStuckBefore = true;
         blockPosStuck = p_37258_.getBlockPos();
         stuckBlock = level().getBlockState(blockPosStuck);
+        BlockPos blockAbovePosStuck = p_37258_.getBlockPos().above();
+        BlockState stuckAboveBlock = level().getBlockState(blockAbovePosStuck);
+        if(stuckBlock.is(Blocks.SNOW) || stuckBlock.is(Blocks.SNOW_BLOCK) || stuckBlock.is(Blocks.POWDER_SNOW) ||
+                stuckAboveBlock.is(Blocks.SNOW) || stuckAboveBlock.is(Blocks.SNOW_BLOCK) ||
+                stuckAboveBlock.is(Blocks.POWDER_SNOW) )
+        {
+            if(!level().isClientSide)
+            {
+                ItemStack drop = new ItemStack(ModItems.STEELBALL.get());
+                ItemEntity itemEntity = new ItemEntity(level(), getX(), getY(), getZ(), drop);
+                level().addFreshEntity(itemEntity);
+
+                discard();
+                return;
+            }
+        }
         if(stuckBlock.getDestroySpeed(level(), blockPosStuck)>= 1.5f)
         {
             phase = FlightPhase.STRONGBLOCKSTOCK;
@@ -496,7 +516,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             wreck.phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
             return;
         }
-        if(stuckEntity instanceof AbstractHorse horse && horse.isTamed())
+        if(!(stuckEntity instanceof AbstractHorse horse && horse.isTamed()))
         {
             stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
         }
