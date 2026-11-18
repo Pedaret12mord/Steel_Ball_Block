@@ -1,9 +1,11 @@
 package net.chargablepipe.keeplooking4ward.entity.custom;
 
+import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.particle.AttachedParticleOptions;
 import net.chargablepipe.keeplooking4ward.particle.AttachedRippleParticleOptions;
 import net.chargablepipe.keeplooking4ward.particle.ModParticles;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
@@ -519,6 +521,18 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         if(!(stuckEntity instanceof AbstractHorse horse && horse.isTamed()))
         {
             stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
+        }
+
+        if(stuckEntity instanceof LivingEntity entity)
+        {
+            net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                    net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> ClientChargeSound.start(
+                            ModSounds.SPINHITSOUND.get(),
+                            false,
+                            entity
+                    )
+            );
         }
 
         System.out.println("stuck");

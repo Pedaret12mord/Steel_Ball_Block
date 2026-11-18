@@ -2,6 +2,7 @@ package net.chargablepipe.keeplooking4ward.item.custom;
 
 import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.custom.SteelBallProjectile;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -36,11 +37,15 @@ public class SteelBallItem extends Item {
                 net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
                         net.minecraftforge.api.distmarker.Dist.CLIENT,
                         () -> () -> ClientChargeSound.start(
-                                SoundEvents.EXPERIENCE_ORB_PICKUP,
+                                ModSounds.SPINSOUND.get(),
                                 LOOP_SOUND,
                                 entity
                         )
                 );
+                //if(entity instanceof Player player)
+                //{
+                    //level.playSeededSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.SPINSOUND);
+                //}
             }
         }
     }
