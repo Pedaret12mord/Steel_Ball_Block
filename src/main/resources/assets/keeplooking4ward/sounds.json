@@ -1,51 +1,51 @@
 {
   "spin_sound":
   {
-    "subtitles": "sounds.keeplookingforward.spin",
+    "subtitles": "sounds.keeplooking4ward.spin",
     "sounds": [
-      "keeplookingforward:spin"
+      "keeplooking4ward:spin"
     ]
   },
   "spin_hit_sound":
   {
-    "subtitles": "sounds.keeplookingforward.spin_hit",
+    "subtitles": "sounds.keeplooking4ward.spin_hit",
     "sounds": [
-      "keeplookingforward:hit_spin"
+      "keeplooking4ward:hit_spin"
     ]
   },
   "sound_block_break":
   {
-    "subtitles": "sounds.keeplookingforward.break",
+    "subtitles": "sounds.keeplooking4ward.break",
     "sounds": [
-      "keeplookingforward:break"
+      "keeplooking4ward:break"
     ]
   },
   "sound_block_fall":
   {
-    "subtitles": "sounds.keeplookingforward.fall",
+    "subtitles": "sounds.keeplooking4ward.fall",
     "sounds": [
-      "keeplookingforward:fall"
+      "keeplooking4ward:fall"
     ]
   },
   "sound_block_hit":
   {
-    "subtitles": "sounds.keeplookingforward.hit",
+    "subtitles": "sounds.keeplooking4ward.hit",
     "sounds": [
-      "keeplookingforward:hit"
+      "keeplooking4ward:hit"
     ]
   },
   "sound_block_step":
   {
-    "subtitles": "sounds.keeplookingforward.step",
+    "subtitles": "sounds.keeplooking4ward.step",
     "sounds": [
-      "keeplookingforward:step"
+      "keeplooking4ward:step"
     ]
   },
   "sound_block_place":
   {
-    "subtitles": "sounds.keeplookingforward.place",
+    "subtitles": "sounds.keeplooking4ward.place",
     "sounds": [
-      "keeplookingforward:place"
+      "keeplooking4ward:place"
     ]
   }
 }

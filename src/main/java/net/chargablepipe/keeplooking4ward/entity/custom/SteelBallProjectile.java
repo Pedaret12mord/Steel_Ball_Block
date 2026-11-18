@@ -88,6 +88,15 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     @Override
     public void tick() {
 
+        net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                net.minecraftforge.api.distmarker.Dist.CLIENT,
+                () -> () -> ClientChargeSound.start(
+                        ModSounds.SPINSOUND.get(),
+                        true,
+                        (LivingEntity) getOwner()
+                )
+        );
+
         if(!level().isClientSide() && level() instanceof ServerLevel serverLevel)
         {
             Vec3 direction = getDeltaMovement().normalize();
