@@ -3,6 +3,7 @@ package net.chargablepipe.keeplooking4ward.entity.custom;
 import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -66,10 +67,21 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private int maxSatellites = 14;
     private int satellitesSpawned;
     private int satelliteSpawnDelay = 1;
-    //public Vec3 velocity;
+    public boolean sfxPlayed;
 
     @Override
     public void tick() {
+        if(!sfxPlayed)
+        {
+            ClientChargeSound.start(
+                    this.getUUID().toString() +"steel_ball_spin",
+                    ModSounds.SPINSOUND.get(),
+                    true,
+                    this
+            );
+            sfxPlayed = true;
+        }
+
         switch (phase) {
 
             // PHASE 1: Fly forward
@@ -232,6 +244,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 Entity owner = this.getOwner();
 
                 if (owner == null || !owner.isAlive()) {
+                    net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                            net.minecraftforge.api.distmarker.Dist.CLIENT,
+                            () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                    );
                     this.discard();
                     return;
                 }
@@ -257,6 +273,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                             }
                         }
                     }
+                    net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                            net.minecraftforge.api.distmarker.Dist.CLIENT,
+                            () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                    );
                     this.discard();
                     return;
                 }
@@ -328,13 +348,14 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
 
             level().addFreshEntity(satellite);
 
-        net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                net.minecraftforge.api.distmarker.Dist.CLIENT,
-                () -> () -> ClientChargeSound.start(SoundEvents.ITEM_PICKUP, false, (LivingEntity) getOwner()
-
-                )
+        ClientChargeSound.start(
+                "satellite" + satellite.getUUID().toString(),
+                SoundEvents.ITEM_PICKUP,
+                false,
+                this
         );
-        //}
+
+
     }
 
 

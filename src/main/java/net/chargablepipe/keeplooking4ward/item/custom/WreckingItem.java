@@ -2,6 +2,7 @@ package net.chargablepipe.keeplooking4ward.item.custom;
 
 import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.custom.WreckingBallProjectile;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -32,6 +33,29 @@ public class WreckingItem extends Item {
         return 72000;
     }
 
+    public void onUseTick(
+            Level level,
+            LivingEntity entity,
+            ItemStack stack,
+            int remainingUseDuration
+    ) {
+        if (level.isClientSide) {
+            int ticksUsed = getUseDuration(stack) - remainingUseDuration;
+
+            if (ticksUsed == 2) {
+
+
+                ClientChargeSound.start(
+                        "steel_ball_spin",
+                        ModSounds.SPINSOUND.get(),
+                        true,
+                        entity
+                );
+            }
+        }
+    }
+
+
     @Override
     public void releaseUsing(
             ItemStack stack,
@@ -39,6 +63,13 @@ public class WreckingItem extends Item {
             LivingEntity entity,
             //int timeLeft,
             int remainingUseDuration) {
+
+        if (level.isClientSide) {
+            net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                    net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> ClientChargeSound.stop("steel_ball_spin")
+            );
+        }
 
 
         int ticksUsed = getUseDuration(stack) - remainingUseDuration;

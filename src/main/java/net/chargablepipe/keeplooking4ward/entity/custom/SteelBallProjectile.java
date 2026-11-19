@@ -60,7 +60,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
     // Configuration
     private double outboundDistance = 25.0;
-    private final int slowdownDuration = 15;
+    private final int slowdownDuration = 5;
     private final double returnSpeed = 1.2;
 
     private Entity stuckEntity;
@@ -83,19 +83,22 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     public  boolean particleSpawned = false;
     public  boolean rippleParticleSpawned = false;
 
+    public  boolean sfxPlayed = false;
+
     public Vec3 velocity;
 
     @Override
     public void tick() {
-
-        net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                net.minecraftforge.api.distmarker.Dist.CLIENT,
-                () -> () -> ClientChargeSound.start(
-                        ModSounds.SPINSOUND.get(),
-                        true,
-                        (LivingEntity) getOwner()
-                )
-        );
+        if(!sfxPlayed)
+        {
+            ClientChargeSound.start(
+                    this.getUUID().toString() +"steel_ball_spin",
+                    ModSounds.SPINSOUND.get(),
+                    true,
+                    this
+            );
+            sfxPlayed = true;
+        }
 
         if(!level().isClientSide() && level() instanceof ServerLevel serverLevel)
         {
@@ -379,6 +382,10 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                         }
                     }
                     this.discard();
+                    net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                            net.minecraftforge.api.distmarker.Dist.CLIENT,
+                            () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                    );
                     return;
                 }
 
@@ -453,6 +460,12 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 stuckAboveBlock.is(Blocks.SNOW) || stuckAboveBlock.is(Blocks.SNOW_BLOCK) ||
                 stuckAboveBlock.is(Blocks.POWDER_SNOW) )
         {
+            if (level().isClientSide) {
+                net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                        net.minecraftforge.api.distmarker.Dist.CLIENT,
+                        () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                );
+            }
             if(!level().isClientSide)
             {
                 ItemStack drop = new ItemStack(ModItems.STEELBALL.get());
@@ -500,22 +513,6 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             steelBall.velocity = steelBall.getDeltaMovement();
             steelBall.phase = FlightPhase.BALLSTUCK;
             return;
-            //previousPhase = phase;
-            //phase = FlightPhase.BALLSTUCK;
-            //velocity = this.getDeltaMovement();
-            //stuckTicks = 0;
-            //noPhysics = true;
-            //setDeltaMovement(Vec3.ZERO);
-
-            // Other projectile
-            //steelBall.previousPhase = steelBall.phase;
-            //steelBall.phase = FlightPhase.BALLSTUCK;
-            //steelBall.velocity = steelBall.getDeltaMovement();
-            //steelBall.stuckTicks = 0;
-            //steelBall.noPhysics = true;
-            //steelBall.setDeltaMovement(Vec3.ZERO);
-
-            //return;
         }
         if(stuckEntity instanceof WreckingBallProjectile wreck) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
         {
@@ -534,14 +531,15 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
         if(stuckEntity instanceof LivingEntity entity)
         {
-            net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                    net.minecraftforge.api.distmarker.Dist.CLIENT,
-                    () -> () -> ClientChargeSound.start(
-                            ModSounds.SPINHITSOUND.get(),
-                            false,
-                            entity
-                    )
-            );
+            if(level().isClientSide)
+            {
+                ClientChargeSound.start(
+                        this.getUUID().toString() + "steel_ball_hit",
+                        ModSounds.SPINHITSOUND.get(),
+                        false,
+                        this
+                );
+            }
         }
 
         System.out.println("stuck");

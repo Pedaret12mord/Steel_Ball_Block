@@ -34,13 +34,12 @@ public class SteelBallItem extends Item {
             int ticksUsed = getUseDuration(stack) - remainingUseDuration;
 
             if (ticksUsed == 11) {
-                net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                        net.minecraftforge.api.distmarker.Dist.CLIENT,
-                        () -> () -> ClientChargeSound.start(
-                                ModSounds.SPINSOUND.get(),
-                                LOOP_SOUND,
-                                entity
-                        )
+
+                ClientChargeSound.start(
+                        "steel_ball_spin",
+                        ModSounds.SPINSOUND.get(),
+                        true,
+                        entity
                 );
                 //if(entity instanceof Player player)
                 //{
@@ -81,7 +80,7 @@ public class SteelBallItem extends Item {
         if (level.isClientSide) {
             net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
                     net.minecraftforge.api.distmarker.Dist.CLIENT,
-                    () -> () -> ClientChargeSound.stop()
+                    () -> () -> ClientChargeSound.stop("steel_ball_spin")
             );
         }
 
@@ -101,8 +100,8 @@ public class SteelBallItem extends Item {
         int ticksUsed = getUseDuration(stack) - remainingUseDuration;
 
         //double maxDistance = 11 + (Math.max(0, ticksUsed - 11) * 8 / 46);
-        double maxDistance = 11 + (Math.max(0, ticksUsed - 11) * 10 / 60);
-        maxDistance = Math.min(maxDistance, 21);
+        double maxDistance = 15 + (Math.max(0, ticksUsed - 11) * 10 / 60);
+        maxDistance = Math.min(maxDistance, 25);
 
         // Put your projectile-shooting code here.
         if (!level.isClientSide() && entity instanceof Player player) {

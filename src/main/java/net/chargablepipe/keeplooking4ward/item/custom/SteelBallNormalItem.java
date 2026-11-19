@@ -32,16 +32,16 @@ public class SteelBallNormalItem extends Item {
         if (level.isClientSide) {
             int ticksUsed = getUseDuration(stack) - remainingUseDuration;
 
-            if (ticksUsed == 14) {
-                net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                        net.minecraftforge.api.distmarker.Dist.CLIENT,
-                        () -> () -> ClientChargeSound.start(
-                                SoundEvents.EXPERIENCE_ORB_PICKUP,
-                                LOOP_SOUND,
-                                entity
-                        )
-                );
-            }
+            //if (ticksUsed == 14) {
+                //net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                      //  net.minecraftforge.api.distmarker.Dist.CLIENT,
+                       // () -> () -> ClientChargeSound.start(
+                              //  SoundEvents.EXPERIENCE_ORB_PICKUP,
+                               // LOOP_SOUND,
+                               // entity
+                       // )
+                //);
+            //}
         }
     }
 
@@ -67,12 +67,12 @@ public class SteelBallNormalItem extends Item {
             int timeLeft) {
 
 
-        if (level.isClientSide) {
-            net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                    net.minecraftforge.api.distmarker.Dist.CLIENT,
-                    () -> () -> ClientChargeSound.stop()
-            );
-        }
+       // if (level.isClientSide) {
+            //net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                  //  net.minecraftforge.api.distmarker.Dist.CLIENT,
+                   // () -> () -> ClientChargeSound.stop()
+           // );
+       // }
 
         if (!level.isClientSide) {
             level.playSound(
