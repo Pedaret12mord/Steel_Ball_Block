@@ -59,7 +59,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     private int slowdownTick = 0;
 
     // Configuration
-    private double outboundDistance = 25.0;
+    private double outboundDistance = 28.0;
     private final int slowdownDuration = 5;
     private final double returnSpeed = 1.2;
 

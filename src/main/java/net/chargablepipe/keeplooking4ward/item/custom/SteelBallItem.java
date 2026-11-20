@@ -100,8 +100,8 @@ public class SteelBallItem extends Item {
         int ticksUsed = getUseDuration(stack) - remainingUseDuration;
 
         //double maxDistance = 11 + (Math.max(0, ticksUsed - 11) * 8 / 46);
-        double maxDistance = 15 + (Math.max(0, ticksUsed - 11) * 10 / 60);
-        maxDistance = Math.min(maxDistance, 25);
+        double maxDistance = 13 + (Math.max(0, ticksUsed - 11) * 10 / 60);
+        maxDistance = Math.min(maxDistance, 28);
 
         // Put your projectile-shooting code here.
         if (!level.isClientSide() && entity instanceof Player player) {

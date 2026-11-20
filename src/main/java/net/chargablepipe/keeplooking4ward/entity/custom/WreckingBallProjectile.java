@@ -45,7 +45,7 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
 
     // Configuration
     private double outboundDistance = 7.0;
-    private final int slowdownDuration = 15;
+    private final int slowdownDuration = 5;
     private final int stopDuration = 45;
     private final double returnSpeed = 1.2;
 
@@ -141,10 +141,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 stopTicks++;
 
                 if (!level().isClientSide()) {
-                    if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
-                        spawnSatellites();
-                        satellitesSpawned++;
-                    }
+                    //if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
+                        //spawnSatellites();
+                        //satellitesSpawned++;
+                    //}
                 }
 
                 // Time to return
