@@ -30,6 +30,10 @@ public class ModEntityRenderer {
                 ModEntities.SATELLITEPROJECT.get(),
                 ThrownItemRenderer::new
         );
+        event.registerEntityRenderer(
+                ModEntities.STEELBALLNORMALPROJECT.get(),
+                ThrownItemRenderer::new
+        );
     }
 
 

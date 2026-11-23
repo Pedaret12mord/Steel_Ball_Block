@@ -1,21 +1,33 @@
 package net.chargablepipe.keeplooking4ward.entity.custom;
 
+import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
+import net.chargablepipe.keeplooking4ward.particle.AttachedParticleOptions;
+import net.chargablepipe.keeplooking4ward.particle.AttachedRippleParticleOptions;
 import net.chargablepipe.keeplooking4ward.particle.ModParticles;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -23,28 +35,32 @@ import net.minecraft.world.phys.Vec3;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
 import net.minecraft.world.phys.EntityHitResult;
 
+import java.awt.event.ItemEvent;
+
 public class SteelBallProjectile extends ThrowableItemProjectile {
     private Vec3 startPosition;
     private Vec3 slowdownStartVelocity;
 
-    private enum FlightPhase {
+    public enum FlightPhase {
         OUTBOUND,
         SLOWING_DOWN,
         STUCK,
+        BALLSTUCK,
         WEAKBLOCKSTOCK,
         STRONGBLOCKSTOCK,
+        COLLIDER,
         RETURNING
     }
 
 
-    private FlightPhase phase = FlightPhase.OUTBOUND;
-    private FlightPhase previousPhase = phase;
+    public FlightPhase phase = FlightPhase.OUTBOUND;
+    public FlightPhase previousPhase = phase;
 
     private int slowdownTick = 0;
 
     // Configuration
-    private final double outboundDistance = 25.0;
-    private final int slowdownDuration = 15;
+    private double outboundDistance = 28.0;
+    private final int slowdownDuration = 5;
     private final double returnSpeed = 1.2;
 
     private Entity stuckEntity;
@@ -65,9 +81,24 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
     public boolean hasStuckBefore;
 
     public  boolean particleSpawned = false;
+    public  boolean rippleParticleSpawned = false;
+
+    public  boolean sfxPlayed = false;
+
+    public Vec3 velocity;
 
     @Override
     public void tick() {
+        if(!sfxPlayed)
+        {
+            ClientChargeSound.start(
+                    this.getUUID().toString() +"steel_ball_spin",
+                    ModSounds.SPINSOUND.get(),
+                    true,
+                    this
+            );
+            sfxPlayed = true;
+        }
 
         if(!level().isClientSide() && level() instanceof ServerLevel serverLevel)
         {
@@ -82,10 +113,26 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
             if(particleSpawned == false)
             {
-                serverLevel.sendParticles(ModParticles.SPIN.get(),
+                serverLevel.sendParticles(
+                        new AttachedParticleOptions(this.getId()),
                         back.x, back.y, back.z,
-                        1, 0, 0, 0, 0);
+                        1, 0, 0, 0, 0
+                );
                 particleSpawned = true;
+            }
+            //serverLevel.sendParticles(
+                    //ParticleTypes.DOLPHIN,
+                    //back.x, back.y, back.z,
+                    //1,0,0,0,0
+           // );
+            if(rippleParticleSpawned == false)
+            {
+                serverLevel.sendParticles(
+                        new AttachedRippleParticleOptions(this.getId()),
+                        back.x, back.y, back.z,
+                        1, 0, 0, 0, 0
+                );
+                rippleParticleSpawned = true;
             }
         }
         switch (phase) {
@@ -94,7 +141,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             case OUTBOUND -> {
                 super.tick();
 
-
+                velocity = this.getDeltaMovement();
                 double distance;
                 if(!hasStuckBefore)
                 {
@@ -162,25 +209,87 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                         stuckEntity.getBbHeight() * 0.5,
                         0
                 );
+                this.setPos(attachedPosition);
 
                 //this.setPos(stuckEntity.position().add(stuckOffset));
 
                 // Immobilize the entity
-                stuckEntity.setDeltaMovement(new Vec3(0,stuckEntity.getDeltaMovement().y,0));
+
 
                 // Damage the entity periodically (server only)
                 if (!this.level().isClientSide() && stuckTicks % damageInterval == 0) {
+                    if(stuckEntity instanceof AbstractHorse horse && horse.isTamed() &&
+                            stuckEntity instanceof LivingEntity livingEntity)
+                    {
+                        livingEntity.heal(2);
+                        horse.addEffect(new MobEffectInstance(
+                                MobEffects.MOVEMENT_SPEED,
+                                10,
+                                1
+                        ));
+                    }
+                    else
+                    {
+                        stuckEntity.setDeltaMovement(new Vec3(0,stuckEntity.getDeltaMovement().y,0));
+                        stuckEntity.hurt(
+                                this.damageSources().thrown(this, this.getOwner()),
+                                stuckDamage
+                        );
+                    }
+                }
 
-                    stuckEntity.hurt(
-                            this.damageSources().thrown(this, this.getOwner()),
-                            stuckDamage
-                    );
+                if(!level().isClientSide() && level() instanceof ServerLevel serverLevel)
+                {
+                    Vec3 direction = getDeltaMovement().normalize();
+
+                    Vec3 center = position().add(0, getBbHeight()/ 2.0, 0);
+
+                    double distance = 0.6;
+
+                    Vec3 front = center.add(direction.scale(distance));
+                    Vec3 back = center.subtract(direction.scale(distance));
+
+                    //if(rippleParticleSpawned == false)
+                    //{
+                        //serverLevel.sendParticles(
+                                //new AttachedRippleParticleOptions(this.getId()),
+                                //back.x, back.y, back.z,
+                                //1, 0, 0, 0, 0
+                       // );
+                        //rippleParticleSpawned = true;
+                    //}
                 }
 
                 // Time to return
                 if (stuckTicks >= stuckDuration) {
                     System.out.println("return");
+                    stuckEntity = null;
                     phase = FlightPhase.RETURNING;
+                }
+            }
+
+            case BALLSTUCK -> {
+
+                stuckTicks++;
+
+                this.setDeltaMovement(new Vec3(0,0,0));
+                //stuckEntity.setDeltaMovement(new Vec3(0,0,0));
+
+                this.noPhysics = true;
+
+                super.tick();
+                //stuckEntity.noPhysics = true;
+
+                // Time to return
+                if (stuckTicks >= stuckDuration) {
+                    if(previousPhase == FlightPhase.OUTBOUND)
+                    {
+                        setDeltaMovement(velocity);
+                    }
+
+                    noPhysics = false;
+                    phase = previousPhase;
+                    stuckEntity = null;
                 }
             }
 
@@ -273,6 +382,10 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                         }
                     }
                     this.discard();
+                    net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                            net.minecraftforge.api.distmarker.Dist.CLIENT,
+                            () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                    );
                     return;
                 }
 
@@ -284,6 +397,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 super.tick();
             }
         }
+    }
+
+    public void setMaxDistance(double distance)
+    {
+        this.outboundDistance = distance;
     }
 
     public SteelBallProjectile(EntityType<? extends ThrowableItemProjectile> p_37442_, Level p_37443_) {
@@ -304,7 +422,19 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
     @Override
     protected Item getDefaultItem() {
-        return ModItems.STEELBALL.get();
+        return ModItems.BOMB.get();
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+
+        if (entity instanceof Projectile) {
+            return entity.isAlive()
+                    && entity != this
+                    && entity != getOwner();
+        }
+
+        return super.canHitEntity(entity);
     }
 
     @Override
@@ -324,6 +454,28 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         hasStuckBefore = true;
         blockPosStuck = p_37258_.getBlockPos();
         stuckBlock = level().getBlockState(blockPosStuck);
+        BlockPos blockAbovePosStuck = p_37258_.getBlockPos().above();
+        BlockState stuckAboveBlock = level().getBlockState(blockAbovePosStuck);
+        if(stuckBlock.is(Blocks.SNOW) || stuckBlock.is(Blocks.SNOW_BLOCK) || stuckBlock.is(Blocks.POWDER_SNOW) ||
+                stuckAboveBlock.is(Blocks.SNOW) || stuckAboveBlock.is(Blocks.SNOW_BLOCK) ||
+                stuckAboveBlock.is(Blocks.POWDER_SNOW) )
+        {
+            if (level().isClientSide) {
+                net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                        net.minecraftforge.api.distmarker.Dist.CLIENT,
+                        () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                );
+            }
+            if(!level().isClientSide)
+            {
+                ItemStack drop = new ItemStack(ModItems.STEELBALL.get());
+                ItemEntity itemEntity = new ItemEntity(level(), getX(), getY(), getZ(), drop);
+                level().addFreshEntity(itemEntity);
+
+                discard();
+                return;
+            }
+        }
         if(stuckBlock.getDestroySpeed(level(), blockPosStuck)>= 1.5f)
         {
             phase = FlightPhase.STRONGBLOCKSTOCK;
@@ -352,8 +504,43 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
         }
 
         //stuckOffset = this.position().subtract(stuckEntity.position());
+        if(stuckEntity instanceof SteelBallProjectile steelBall) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            previousPhase = phase;
+            velocity = this.getDeltaMovement();
+            phase = FlightPhase.BALLSTUCK;
+            steelBall.previousPhase = steelBall.phase;
+            steelBall.velocity = steelBall.getDeltaMovement();
+            steelBall.phase = FlightPhase.BALLSTUCK;
+            return;
+        }
+        if(stuckEntity instanceof WreckingBallProjectile wreck) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            previousPhase = phase;
+            velocity = this.getDeltaMovement();
+            phase = FlightPhase.BALLSTUCK;
+            wreck.previousPhase = wreck.phase;
+            //wreck.velocity = wreck.getDeltaMovement();
+            wreck.phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
+            return;
+        }
+        if(!(stuckEntity instanceof AbstractHorse horse && horse.isTamed()))
+        {
+            stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
+        }
 
-        stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
+        if(stuckEntity instanceof LivingEntity entity)
+        {
+            if(level().isClientSide)
+            {
+                ClientChargeSound.start(
+                        this.getUUID().toString() + "steel_ball_hit",
+                        ModSounds.SPINHITSOUND.get(),
+                        false,
+                        this
+                );
+            }
+        }
 
         System.out.println("stuck");
         phase = FlightPhase.STUCK;

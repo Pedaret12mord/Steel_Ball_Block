@@ -2,11 +2,13 @@ package net.chargablepipe.keeplooking4ward.item.custom;
 
 import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.custom.SteelBallProjectile;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.sounds.SoundEvents;
@@ -31,15 +33,18 @@ public class SteelBallItem extends Item {
         if (level.isClientSide) {
             int ticksUsed = getUseDuration(stack) - remainingUseDuration;
 
-            if (ticksUsed == 14) {
-                net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                        net.minecraftforge.api.distmarker.Dist.CLIENT,
-                        () -> () -> ClientChargeSound.start(
-                                SoundEvents.EXPERIENCE_ORB_PICKUP,
-                                LOOP_SOUND,
-                                entity
-                        )
+            if (ticksUsed == 11) {
+
+                ClientChargeSound.start(
+                        "steel_ball_spin",
+                        ModSounds.SPINSOUND.get(),
+                        true,
+                        entity
                 );
+                //if(entity instanceof Player player)
+                //{
+                    //level.playSeededSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.SPINSOUND);
+                //}
             }
         }
     }
@@ -58,18 +63,24 @@ public class SteelBallItem extends Item {
         return 72000;
     }
 
+    //@Override
+    //public UseAnim getUseAnimation(ItemStack p_41452_) {
+        //return UseAnim.BOW;
+    //}
+
     @Override
     public void releaseUsing(
             ItemStack stack,
             Level level,
             LivingEntity entity,
-            int timeLeft) {
+            //int timeLeft,
+            int remainingUseDuration) {
 
 
         if (level.isClientSide) {
             net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
                     net.minecraftforge.api.distmarker.Dist.CLIENT,
-                    () -> () -> ClientChargeSound.stop()
+                    () -> () -> ClientChargeSound.stop("steel_ball_spin")
             );
         }
 
@@ -86,10 +97,18 @@ public class SteelBallItem extends Item {
             );
         }
 
+        int ticksUsed = getUseDuration(stack) - remainingUseDuration;
+
+        //double maxDistance = 11 + (Math.max(0, ticksUsed - 11) * 8 / 46);
+        double maxDistance = 13 + (Math.max(0, ticksUsed - 11) * 10 / 60);
+        maxDistance = Math.min(maxDistance, 28);
+
         // Put your projectile-shooting code here.
         if (!level.isClientSide() && entity instanceof Player player) {
 
             SteelBallProjectile projectile = new SteelBallProjectile(level, player);
+
+            projectile.setMaxDistance(maxDistance);
 
             // Set the projectile's initial position
             projectile.setPos(

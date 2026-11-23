@@ -5,7 +5,9 @@ import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModCreativeModTabs;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
 import net.chargablepipe.keeplooking4ward.particle.ModParticles;
+import net.chargablepipe.keeplooking4ward.particle.RippleParticles;
 import net.chargablepipe.keeplooking4ward.particle.SpinParticles;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
@@ -38,6 +40,8 @@ public class KeepLooking4ward
         ModEntities.register(FMLJavaModLoadingContext.get().getModEventBus());
 
         ModItems.register(modEventBus);
+
+        ModSounds.register(modEventBus);
 
         ModParticles.register(modEventBus);
         //IEventBus modEventBus = context.getModEventBus();
@@ -92,6 +96,7 @@ public class KeepLooking4ward
         public static void registerParticleProvider(RegisterParticleProvidersEvent event)
         {
             event.registerSpriteSet(ModParticles.SPIN.get(), SpinParticles.Provider::new);
+            event.registerSpriteSet(ModParticles.RIPPLE.get(), RippleParticles.Provider::new);
         }
     }
 }

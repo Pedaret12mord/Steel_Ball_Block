@@ -3,6 +3,7 @@ package net.chargablepipe.keeplooking4ward.entity.custom;
 import net.chargablepipe.keeplooking4ward.client.ClientChargeSound;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
+import net.chargablepipe.keeplooking4ward.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -10,11 +11,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -24,23 +28,24 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private Vec3 startPosition;
     private Vec3 slowdownStartVelocity;
 
-    private enum FlightPhase {
+    public enum FlightPhase {
         OUTBOUND,
         SLOWING_DOWN,
         WEAKBLOCKSTOCK,
         STRONGBLOCKSTOCK,
         RETURNING,
-        STOPPING
+        STOPPING,
+        BALLSTUCK
     }
 
-    private FlightPhase phase = FlightPhase.OUTBOUND;
-    private FlightPhase previousPhase = phase;
+    public FlightPhase phase = FlightPhase.OUTBOUND;
+    public FlightPhase previousPhase = phase;
 
     private int slowdownTick = 0;
 
     // Configuration
-    private final double outboundDistance = 7.0;
-    private final int slowdownDuration = 15;
+    private double outboundDistance = 7.0;
+    private final int slowdownDuration = 5;
     private final int stopDuration = 45;
     private final double returnSpeed = 1.2;
 
@@ -50,8 +55,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private BlockPos blockPosStuck;
 
     private int stopTicks = 0;
+    private int stuckTicks = 0;
     private int blockStuckTick = 0;
 
+    private final int stuckDuration = 100;
     private final int hardBlockStuckDuration = 100;
     public double blockStuckDuration;
     public double wholeDistance;
@@ -60,9 +67,21 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
     private int maxSatellites = 14;
     private int satellitesSpawned;
     private int satelliteSpawnDelay = 1;
+    public boolean sfxPlayed;
 
     @Override
     public void tick() {
+        if(!sfxPlayed)
+        {
+            ClientChargeSound.start(
+                    this.getUUID().toString() +"steel_ball_spin",
+                    ModSounds.SPINSOUND.get(),
+                    true,
+                    this
+            );
+            sfxPlayed = true;
+        }
+
         switch (phase) {
 
             // PHASE 1: Fly forward
@@ -122,6 +141,31 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 stopTicks++;
 
                 if (!level().isClientSide()) {
+                    //if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
+                        //spawnSatellites();
+                        //satellitesSpawned++;
+                    //}
+                }
+
+                // Time to return
+                if (stopTicks>= stopDuration) {
+                    phase = WreckingBallProjectile.FlightPhase.RETURNING;
+                }
+            }
+
+            case BALLSTUCK -> {
+
+                stuckTicks++;
+
+                this.setDeltaMovement(new Vec3(0,0,0));
+                //stuckEntity.setDeltaMovement(new Vec3(0,0,0));
+
+                this.noPhysics = true;
+
+                super.tick();
+                //stuckEntity.noPhysics = true;
+
+                if (!level().isClientSide()) {
                     if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
                         spawnSatellites();
                         satellitesSpawned++;
@@ -129,8 +173,12 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 }
 
                 // Time to return
-                if (stopTicks>= stopDuration) {
-                    phase = WreckingBallProjectile.FlightPhase.RETURNING;
+                if (stuckTicks >= stuckDuration) {
+                    phase = FlightPhase.RETURNING;
+
+                    noPhysics = false;
+                    //phase = previousPhase;
+                    stuckEntity = null;
                 }
             }
 
@@ -196,6 +244,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 Entity owner = this.getOwner();
 
                 if (owner == null || !owner.isAlive()) {
+                    net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                            net.minecraftforge.api.distmarker.Dist.CLIENT,
+                            () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                    );
                     this.discard();
                     return;
                 }
@@ -221,6 +273,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                             }
                         }
                     }
+                    net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                            net.minecraftforge.api.distmarker.Dist.CLIENT,
+                            () -> () -> ClientChargeSound.stop(this.getUUID().toString() +"steel_ball_spin")
+                    );
                     this.discard();
                     return;
                 }
@@ -233,6 +289,11 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 super.tick();
             }
         }
+    }
+
+    public void setMaxDistance(double distance)
+    {
+        this.outboundDistance = distance;
     }
 
 
@@ -287,19 +348,32 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
 
             level().addFreshEntity(satellite);
 
-        net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
-                net.minecraftforge.api.distmarker.Dist.CLIENT,
-                () -> () -> ClientChargeSound.start(SoundEvents.ITEM_PICKUP, false, (LivingEntity) getOwner()
-
-                )
+        ClientChargeSound.start(
+                "satellite" + satellite.getUUID().toString(),
+                SoundEvents.ITEM_PICKUP,
+                false,
+                this
         );
-        //}
+
+
     }
 
 
     @Override
     protected Item getDefaultItem() {
         return ModItems.WRECKING_BALL.get();
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+
+        if (entity instanceof Projectile) {
+            return entity.isAlive()
+                    && entity != this
+                    && entity != getOwner();
+        }
+
+        return super.canHitEntity(entity);
     }
 
     @Override
@@ -319,6 +393,22 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
         hasStuckBefore = true;
         blockPosStuck = p_37258_.getBlockPos();
         stuckBlock = level().getBlockState(blockPosStuck);
+        BlockPos blockAbovePosStuck = p_37258_.getBlockPos().above();
+        BlockState stuckAboveBlock = level().getBlockState(blockAbovePosStuck);
+        if(stuckBlock.is(Blocks.SNOW) || stuckBlock.is(Blocks.SNOW_BLOCK) || stuckBlock.is(Blocks.POWDER_SNOW) ||
+                stuckAboveBlock.is(Blocks.SNOW) || stuckAboveBlock.is(Blocks.SNOW_BLOCK) ||
+                stuckAboveBlock.is(Blocks.POWDER_SNOW) )
+        {
+            if(!level().isClientSide)
+            {
+                ItemStack drop = new ItemStack(ModItems.WRECKING_BALL.get());
+                ItemEntity itemEntity = new ItemEntity(level(), getX(), getY(), getZ(), drop);
+                level().addFreshEntity(itemEntity);
+
+                discard();
+                return;
+            }
+        }
         if(stuckBlock.getDestroySpeed(level(), blockPosStuck)>= 1.5f)
         {
             phase = FlightPhase.STRONGBLOCKSTOCK;
@@ -343,7 +433,28 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
             return;
         }
 
-        stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),2);
+        if(stuckEntity instanceof SteelBallProjectile steelBall) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            previousPhase = phase;
+            //velocity = this.getDeltaMovement();
+            phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
+            steelBall.previousPhase = steelBall.phase;
+            steelBall.velocity = steelBall.getDeltaMovement();
+            steelBall.phase = SteelBallProjectile.FlightPhase.BALLSTUCK;
+            return;
+        }
+        if(stuckEntity instanceof WreckingBallProjectile wreck) //|| stuckEntity instanceof SteelBallNormalProjectile steelBallNormal || stuckEntity instanceof WreckingBallProjectile wreckingBall)
+        {
+            previousPhase = phase;
+           // velocity = this.getDeltaMovement();
+            phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
+            wreck.previousPhase = wreck.phase;
+            //wreck.velocity = wreck.getDeltaMovement();
+            wreck.phase = WreckingBallProjectile.FlightPhase.BALLSTUCK;
+            return;
+        }
+
+        stuckEntity.hurt(this.damageSources().thrown(this, this.getOwner()),5);
 
     }
 }
