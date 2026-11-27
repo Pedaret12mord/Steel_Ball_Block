@@ -11,6 +11,10 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -197,8 +201,11 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 if (stuckEntity == null || !stuckEntity.isAlive()) {
                     System.out.println("return");
                     phase = FlightPhase.RETURNING;
+                    setEmittingLight(false);
                     return;
                 }
+
+                setEmittingLight(true);
 
                 stuckTicks++;
 
@@ -264,6 +271,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 if (stuckTicks >= stuckDuration) {
                     System.out.println("return");
                     stuckEntity = null;
+                    setEmittingLight(false);
                     phase = FlightPhase.RETURNING;
                 }
             }
@@ -271,6 +279,8 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
             case BALLSTUCK -> {
 
                 stuckTicks++;
+
+                setEmittingLight(true);
 
                 this.setDeltaMovement(new Vec3(0,0,0));
                 //stuckEntity.setDeltaMovement(new Vec3(0,0,0));
@@ -289,6 +299,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
 
                     noPhysics = false;
                     phase = previousPhase;
+                    setEmittingLight(false);
                     stuckEntity = null;
                 }
             }
@@ -324,10 +335,13 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 if (stuckBlock == null)
                 {
                     System.out.println("return");
+                    setEmittingLight(false);
                     phase = FlightPhase.RETURNING;
                     return;
                 }
                 blockStuckTick++;
+
+                setEmittingLight(true);
 
                 // Attach the projectile to the entity
                 Vec3 attachedPosition = blockPosStuck.getCenter();
@@ -346,6 +360,7 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                     level().destroyBlock(blockPosStuck, true);
                     blockStuckTick = 0;
                     System.out.println("return");
+                    setEmittingLight(false);
                     phase = FlightPhase.RETURNING;
                 }
             }
@@ -397,6 +412,28 @@ public class SteelBallProjectile extends ThrowableItemProjectile {
                 super.tick();
             }
         }
+    }
+
+    private static final EntityDataAccessor<Boolean> EMITTING_LIGHT =
+            SynchedEntityData.defineId(
+                    SteelBallProjectile.class,
+                    EntityDataSerializers.BOOLEAN
+            );
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(EMITTING_LIGHT, false);
+    }
+
+    public void setEmittingLight(boolean emitting)
+    {
+        this.entityData.set(EMITTING_LIGHT, emitting);
+    }
+
+    public boolean isEmittingLight()
+    {
+        return this.entityData.get(EMITTING_LIGHT);
     }
 
     public void setMaxDistance(double distance)
