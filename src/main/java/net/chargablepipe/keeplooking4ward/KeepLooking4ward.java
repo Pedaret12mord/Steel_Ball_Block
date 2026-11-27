@@ -1,6 +1,7 @@
 package net.chargablepipe.keeplooking4ward;
 
 import com.mojang.logging.LogUtils;
+import net.chargablepipe.keeplooking4ward.client.DynamicLightRegistration;
 import net.chargablepipe.keeplooking4ward.entity.ModEntities;
 import net.chargablepipe.keeplooking4ward.item.ModCreativeModTabs;
 import net.chargablepipe.keeplooking4ward.item.ModItems;
@@ -89,7 +90,7 @@ public class KeepLooking4ward
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
         {
-
+            event.enqueueWork(DynamicLightRegistration::register);
         }
 
         @SubscribeEvent
