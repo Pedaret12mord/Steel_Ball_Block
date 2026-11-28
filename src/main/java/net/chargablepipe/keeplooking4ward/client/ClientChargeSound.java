@@ -65,7 +65,7 @@ public class ClientChargeSound {
 
             this.looping = looping;
             this.delay = 0;
-            this.volume = 50.0F;
+            this.volume = 3.0F;
             this.pitch = 1.0F;
 
             this.x = entity.getX();

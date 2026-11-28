@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 public class SatelliteProjectile extends ThrowableItemProjectile {
 
     private Vec3 startPosition;
-    private float hitDamage = 5;
+    private float hitDamage = 7;
     private int effectDuration = 100;
     private int lifeTime = 50;
     private int lifeTimeTick =0;
@@ -29,8 +29,8 @@ public class SatelliteProjectile extends ThrowableItemProjectile {
     private Mob homingTarget = null;
     private boolean trackingEnded = false;
 
-    private final double detectionRadius = 4;
-    private final double maxTrackingRange = 9;
+    private final double detectionRadius = 6;
+    private final double maxTrackingRange = 10;
 
     private final double turnStrength = 1;
 

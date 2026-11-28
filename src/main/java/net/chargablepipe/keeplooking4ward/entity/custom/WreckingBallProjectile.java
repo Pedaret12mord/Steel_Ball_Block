@@ -141,10 +141,10 @@ public class WreckingBallProjectile extends ThrowableItemProjectile {
                 stopTicks++;
 
                 if (!level().isClientSide()) {
-                    //if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
-                        //spawnSatellites();
-                        //satellitesSpawned++;
-                    //}
+                    if (satellitesSpawned < maxSatellites && tickCount % satelliteSpawnDelay == 0) {
+                        spawnSatellites();
+                        satellitesSpawned++;
+                    }
                 }
 
                 // Time to return

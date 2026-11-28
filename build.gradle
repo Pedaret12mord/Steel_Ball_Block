@@ -87,9 +87,6 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
-    flatDir {
-        dir 'libs'
-    }
     maven{
         url = "https://api.modrinth.com/maven"
     }
@@ -99,10 +96,38 @@ dependencies {
     //implementation fg.deobf(files("libs/RyoamicLights-forge-0.2.3+mc1.20.1.jar"))
     //implementation fg.deobf(files("libs/ObsidianUI-forge-0.2.3+mc1.20.1.jar"))
 
-    //implementation fg.deobf("blank:RyoamicLights-forge:0.2.3+mc1.20.1")
+
+
+
+
+    ///implementation fg.deobf("blank:RyoamicLights-forge:0.2.3+mc1.20.1")
+
+
+
+
+
     //runtimeOnly fg.deobf("blank:ObsidianUI-forge:0.2.3+mc1.20.1")
 
-    compileOnly fg.deobf("blank:RyoamicLights-forge:0.2.3+mc1.20.1")
+
+
+
+
+
+
+    ///implementation fg.deobf("blank:ObsidianUI-forge:0.2.3+mc1.20.1")
+    ///implementation fg.deobf("dev.architectury:architectury-forge:9.2.14")
+
+
+
+    // Architectury API
+    //implementation fg.deobf("dev.architectury:architectury-forge:9.2.14")
+
+
+
+
+    //compileOnly fg.deobf("blank:RyoamicLights-forge:0.2.3+mc1.20.1")
+
+
 
     // Specify the version of Minecraft to use.
     // Any artifact can be supplied so long as it has a "userdev" classifier artifact and is a compatible patcher artifact.
